@@ -14,6 +14,11 @@ const App: Component = () => {
         path="/app/hand-landmark-detection"
         component={lazy(() => import("./pages/HandLandmarkDetection"))}
       ></Route>
+      <Route
+        path="/app/pose-landmark-detection"
+        component={lazy(() => import("./pages/PoseLandmarkDetection"))}
+      ></Route>
+      <Route path="*" element={<div>404</div>}></Route>
     </Routes>
   );
 };

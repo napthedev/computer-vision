@@ -1,4 +1,4 @@
-import { onMount, type Component, createSignal } from "solid-js";
+import { onMount, type Component, createSignal, onCleanup } from "solid-js";
 import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
 import { HAND_CONNECTIONS } from "@mediapipe/hands";
@@ -8,6 +8,9 @@ const HandLandmarkDetection: Component = () => {
   const [isCameraError, setIsCameraError] = createSignal(false);
   const [isModelError, setIsModelError] = createSignal(false);
 
+  let stream: MediaStream;
+  let myAnimationFrame: ReturnType<typeof requestAnimationFrame>;
+
   onMount(async () => {
     const video = document.createElement("video");
     const canvas = document.createElement("canvas");
@@ -16,8 +19,6 @@ const HandLandmarkDetection: Component = () => {
     document.querySelector("#main")?.appendChild(canvas);
 
     video.setAttribute("autoplay", "true");
-
-    let stream: MediaStream;
 
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -76,13 +77,18 @@ const HandLandmarkDetection: Component = () => {
           lastVideoTime = video.currentTime;
         }
 
-        requestAnimationFrame(() => renderLoop());
+        myAnimationFrame = requestAnimationFrame(() => renderLoop());
       }
 
       renderLoop();
     } catch (error) {
       setIsModelError(true);
     }
+  });
+
+  onCleanup(() => {
+    stream.getTracks().forEach((track) => track.stop());
+    cancelAnimationFrame(myAnimationFrame);
   });
 
   return (

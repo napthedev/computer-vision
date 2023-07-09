@@ -6,6 +6,7 @@ const Home: Component = () => {
     <div>
       <A href="/app/face-detection">Face detection</A>
       <A href="/app/hand-landmark-detection">Hand landmark detection</A>
+      <A href="/app/pose-landmark-detection">Pose landmark detection</A>
     </div>
   );
 };

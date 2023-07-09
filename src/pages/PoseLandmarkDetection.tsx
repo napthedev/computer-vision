@@ -1,7 +1,11 @@
 import { onMount, type Component, createSignal, onCleanup } from "solid-js";
-import { FilesetResolver, FaceDetector } from "@mediapipe/tasks-vision";
+import {
+  FilesetResolver,
+  PoseLandmarker,
+  DrawingUtils,
+} from "@mediapipe/tasks-vision";
 
-const FaceDetection: Component = () => {
+const PoseLandmarkDetection: Component = () => {
   const [isLoading, setIsLoading] = createSignal(true);
   const [isCameraError, setIsCameraError] = createSignal(false);
   const [isModelError, setIsModelError] = createSignal(false);
@@ -13,6 +17,8 @@ const FaceDetection: Component = () => {
     const video = document.createElement("video");
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
+
+    const drawingUtils = new DrawingUtils(ctx);
 
     document.querySelector("#main")?.appendChild(canvas);
 
@@ -38,13 +44,14 @@ const FaceDetection: Component = () => {
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
       );
-      const faceDetector = await FaceDetector.createFromOptions(vision, {
+      const faceDetector = await PoseLandmarker.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
+            "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
           delegate: "GPU",
         },
         runningMode: "VIDEO",
+        numPoses: 2,
       });
 
       setIsLoading(false);
@@ -53,35 +60,22 @@ const FaceDetection: Component = () => {
       function renderLoop(): void {
         if (video.currentTime !== lastVideoTime) {
           let time = performance.now();
-          const { detections } = faceDetector.detectForVideo(video, time);
+          const { landmarks } = faceDetector.detectForVideo(video, time);
           lastVideoTime = video.currentTime;
 
           ctx.save();
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-          ctx.strokeStyle = "#5383EC";
-          ctx.lineWidth = 4;
-
-          if (detections.length > 0) {
-            for (let i = 0; i < detections.length; i++) {
-              const { originX, originY, width, height } =
-                detections[i].boundingBox!;
-              ctx.strokeRect(originX, originY, width, height);
-
-              if (detections[i].categories?.[0]?.score) {
-                ctx.fillStyle = "#5383EC";
-                ctx.fillRect(originX, originY, 70, 35);
-
-                ctx.fillStyle = "#FFFFFF";
-                ctx.font = "25px Arial";
-                ctx.fillText(
-                  `${Math.round(detections[i].categories?.[0]?.score * 100)}%`,
-                  originX + 10,
-                  originY + 25
-                );
-              }
-            }
+          for (const landmark of landmarks) {
+            drawingUtils.drawLandmarks(landmark, {
+              radius: (data) =>
+                DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1),
+            });
+            drawingUtils.drawConnectors(
+              landmark,
+              PoseLandmarker.POSE_CONNECTIONS
+            );
           }
 
           ctx.restore();
@@ -117,4 +111,4 @@ const FaceDetection: Component = () => {
   );
 };
 
-export default FaceDetection;
+export default PoseLandmarkDetection;
