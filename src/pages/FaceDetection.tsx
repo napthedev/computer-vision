@@ -70,16 +70,19 @@ const FaceDetection: Component = () => {
               ctx.strokeRect(originX, originY, width, height);
 
               if (detections[i].categories?.[0]?.score) {
+                ctx.font = "25px Arial";
+
+                const text = `${Math.round(
+                  detections[i].categories?.[0]?.score * 100
+                )}%`;
+
+                const textWidth = ctx.measureText(text).width;
+
                 ctx.fillStyle = "#5383EC";
-                ctx.fillRect(originX, originY, 70, 35);
+                ctx.fillRect(originX, originY, textWidth + 20, 35);
 
                 ctx.fillStyle = "#FFFFFF";
-                ctx.font = "25px Arial";
-                ctx.fillText(
-                  `${Math.round(detections[i].categories?.[0]?.score * 100)}%`,
-                  originX + 10,
-                  originY + 25
-                );
+                ctx.fillText(text, originX + 10, originY + 25);
               }
             }
           }

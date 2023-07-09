@@ -18,6 +18,10 @@ const App: Component = () => {
         path="/app/pose-landmark-detection"
         component={lazy(() => import("./pages/PoseLandmarkDetection"))}
       ></Route>
+      <Route
+        path="/app/object-detection"
+        component={lazy(() => import("./pages/ObjectDetection"))}
+      ></Route>
       <Route path="*" element={<div>404</div>}></Route>
     </Routes>
   );
