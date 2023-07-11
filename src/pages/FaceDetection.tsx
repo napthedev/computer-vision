@@ -1,5 +1,7 @@
 import { onMount, type Component, createSignal, onCleanup } from "solid-js";
 import { FilesetResolver, FaceDetector } from "@mediapipe/tasks-vision";
+import { A } from "@solidjs/router";
+import Overlay from "../components/Overlay";
 
 const FaceDetection: Component = () => {
   const [isLoading, setIsLoading] = createSignal(true);
@@ -107,15 +109,34 @@ const FaceDetection: Component = () => {
   return (
     <div>
       {isCameraError() ? (
-        <div>Please allow camera permission</div>
+        <Overlay>Please allow camera permission</Overlay>
       ) : isModelError() ? (
-        <div>Something went wrong with the AI model</div>
+        <Overlay>Something went wrong with the AI model</Overlay>
       ) : isLoading() ? (
-        <div>Loading...</div>
+        <Overlay>
+          <img src="/spinner.svg" alt="" />
+        </Overlay>
       ) : (
         <></>
       )}
-      <div id="main"></div>
+      <div class="min-h-screen flex flex-col items-center">
+        <div class="flex-1">
+          <A href="/" class="inline-flex items-center my-3">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              style="fill: rgba(0, 0, 0, 1);transform: ;msFilter:;"
+            >
+              <path d="M21 11H6.414l5.293-5.293-1.414-1.414L2.586 12l7.707 7.707 1.414-1.414L6.414 13H21z"></path>
+            </svg>
+            <span>Back</span>
+          </A>
+        </div>
+        <div class="flex-1" id="main"></div>
+        <div class="flex-1"></div>
+      </div>
     </div>
   );
 };
