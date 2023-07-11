@@ -1,7 +1,6 @@
 import { onMount, type Component, createSignal, onCleanup } from "solid-js";
 import { FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
-import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
-import { HAND_CONNECTIONS } from "@mediapipe/hands";
+import { HAND_CONNECTIONS } from "../utils/hands";
 import Overlay from "../components/Overlay";
 import { A } from "@solidjs/router";
 
@@ -65,12 +64,36 @@ const HandLandmarkDetection: Component = () => {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
           if (result.landmarks.length > 0) {
-            for (const landmarks of result.landmarks) {
-              drawConnectors(ctx, landmarks, HAND_CONNECTIONS, {
-                color: "#00FF00",
-                lineWidth: 5,
-              });
-              drawLandmarks(ctx, landmarks, { color: "#FF0000", lineWidth: 2 });
+            for (const landmark of result.landmarks) {
+              for (const connection of HAND_CONNECTIONS) {
+                ctx.beginPath();
+                ctx.moveTo(
+                  landmark[connection[0]].x * canvas.width,
+                  landmark[connection[0]].y * canvas.height
+                );
+                ctx.lineTo(
+                  landmark[connection[1]].x * canvas.width,
+                  landmark[connection[1]].y * canvas.height
+                );
+                ctx.strokeStyle = "#00FF00";
+                ctx.lineWidth = 5;
+                ctx.stroke();
+                ctx.closePath();
+              }
+
+              for (const point of landmark) {
+                ctx.beginPath();
+                ctx.arc(
+                  point.x * canvas.width,
+                  point.y * canvas.height,
+                  8 * (1 - point.z),
+                  0,
+                  2 * Math.PI
+                );
+                ctx.fillStyle = "#FF0000";
+                ctx.fill();
+                ctx.closePath();
+              }
             }
           }
 

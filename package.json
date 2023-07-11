@@ -19,8 +19,6 @@
     "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
-    "@mediapipe/drawing_utils": "^0.3.1675466124",
-    "@mediapipe/hands": "^0.4.1675469240",
     "@mediapipe/tasks-vision": "0.10.0",
     "@solidjs/router": "^0.8.2",
     "solid-js": "^1.7.6"
